@@ -15,8 +15,10 @@ class Layer:
         self.inNodes = inputSize
         self.outNodes = outputSize
 
-        self.bias: float = np.random.rand(outputSize) #List[m] of biases
+        self.bias: float = np.random.rand(outputSize) #List[n] of biases
         self.weights: np.ndarray = np.random.rand(inputSize, outputSize) #List[n] of List[m] of weights
+
+
 
         if kwargs:
             try:
@@ -28,11 +30,11 @@ class Layer:
             except KeyError:
                 print('Incorrect keword arguments, only support "biases" and "weights"')
 
-        self.costGradientWeights: np.ndarray = np.ndarray(shape=self.weights.shape)
-        self.costGradientBias: np.ndarray = np.ndarray(shape=self.bias.shape)
+        self.costGradientWeights: np.ndarray = np.zeros(shape=self.weights.shape)
+        self.costGradientBias: np.ndarray = np.zeros(shape=self.bias.shape)
 
-        self.weightVelocities: np.ndarray = np.ndarray(shape=self.weights.shape)
-        self.biasVelocities: np.ndarray = np.ndarray(shape=self.bias.shape) 
+        self.weightVelocities: np.ndarray = np.zeros(shape=self.weights.shape)
+        self.biasVelocities: np.ndarray = np.zeros(shape=self.bias.shape) 
 
         self.activation: Activation = activation
         
@@ -48,6 +50,7 @@ class Layer:
 
         '''
         outputs: np.ndarray = np.dot(inputs, self.weights) + self.bias
+        #print(f'{outputs=}')
         return self.activation.activation(z=outputs)
 
     def forwardAndStore(self, inputs: np.ndarray) -> List[np.ndarray]:

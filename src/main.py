@@ -65,9 +65,30 @@ if __name__ == '__main__':
     testingLabelsArr = testingLabelsArr.reshape((desiredTestingDatasetSize, 1))
     #create training and testing data batches
     training = DataBatch(inputsArr=trainingImagesArr, expectedArr=trainingLabelsArr)
-    myNN.train(trainingData=training, batchSize = -1, epochs=1000, learnRate=0.1, regularization=0, momentum=0)
     
-    #show images
-    #showImage(trainingImagesArr, 1)
+    
+    #load model
+    '''
+    loadedNN: NeuralNetwork
+    with open('brain(336.78164206801137)', 'rb') as brainFile:
+        loadedNN = pickle.load(brainFile)
+    ''' 
 
-    
+
+    #test model
+    testing = DataBatch(inputsArr=testingImagesArr, expectedArr=testingLabelsArr)
+    results = myNN.test(testingData=testing, testSize = 5)
+    #results = loadedNN.test(testingData=testing, testSize=5)
+
+    print('before testing')
+    for expected, predicted in results.items():
+        print(f'prediction: {predicted}, true: {expected}')
+
+    myNN.train(trainingData=training, batchSize = -1, epochs=10000, learnRate=0.2, regularization=0, momentum=0.1, cool=True)
+
+    results = myNN.test(testingData=testing, testSize = 5)
+    #results = loadedNN.test(testingData=testing, testSize=5)
+
+    print('after testing')
+    for expected, predicted in results.items():
+        print(f'prediction: {predicted}, true: {expected}')

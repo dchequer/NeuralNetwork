@@ -1,7 +1,10 @@
+from math import isnan
 from Layer import *
 from Data import *
 from typing import List, Dict
 from alive_progress import alive_bar
+
+import pickle
 
 class NeuralNetwork:
     def __init__(self, layerSizes: List[int], activation:Activation, cost: Cost):
@@ -18,9 +21,8 @@ class NeuralNetwork:
         '''
         Repeteadly Propagate Forward
         '''
-        for layer in self.layers:
+        for i, layer in enumerate(self.layers):
             inputs = layer.forward(inputs=inputs)
-        
         return inputs
     
     def fullBackward(self, dataPoint: DataPoint) -> None:
@@ -71,14 +73,35 @@ class NeuralNetwork:
         
         return self.calculateAvgCost(dataPoints=learningBatch)
 
-    def train(self, trainingData: DataBatch, batchSize: int, epochs: int, learnRate: float, regularization: float = 0, momentum: float = 0) -> None:
-        with alive_bar(epochs, dual_line=True, title='Learning') as bar:
+    def train(self, trainingData: DataBatch, batchSize: int, epochs: int, learnRate: float, regularization: float = 0, momentum: float = 0, cool: bool = False) -> None:
+        if cool:
+            with alive_bar(epochs, dual_line=True, title='Learning') as bar:
+                runningAvg = 0
+                for epoch in range(epochs):
+                    curAvg = self.learn(learningBatch=trainingData.miniBatch(size=batchSize), learnRate=learnRate, regularization=regularization, momentum=momentum)
+                    runningAvg += curAvg
+                    bar.text = f'Epoch {epoch} Real-Time-Cost: {curAvg} Avg-Cost: {runningAvg/(epoch+1)}'
+                    bar()
+        else:
             runningAvg = 0
             for epoch in range(epochs):
                 curAvg = self.learn(learningBatch=trainingData.miniBatch(size=batchSize), learnRate=learnRate, regularization=regularization, momentum=momentum)
                 runningAvg += curAvg
-                bar.text = f'Epoch {epoch} Real-Time Cost: {self.calculateAvgCost(dataPoints=trainingData)} Avg Cost: {runningAvg/(epoch+1)}'
-                bar()
+                if epoch % 250 == 0:
+                    print(f'Epoch {epoch} Real-Time-Cost: {self.calculateAvgCost(dataPoints=trainingData)} Avg Cost: {runningAvg/(epoch+1)}')
+        
+        self.saveBrain(f'brain({curAvg})')
+
+    def test(self, testingData: DataBatch, testSize: int) -> Dict[int, List[float]]:
+        testingData: List[DataPoint] = np.random.choice(a=testingData.dataPoints, size=testSize)
+
+        predictions: Dict = {}
+        for i, dataPoint in enumerate(testingData):
+            testInput, testAnswer = dataPoint.inputs, dataPoint.expected
+            prediction = self.getMaxOutputNeuronIndex(testInput)
+            predictions[i] = [testAnswer, prediction[0]]
+
+        return predictions
 
     def calculateCost(self, dataPoint: DataPoint) -> float:
         expectedOutputs: np.ndarray = dataPoint.expected #outputs from given DataPoint (true values)
@@ -88,11 +111,14 @@ class NeuralNetwork:
     
     def calculateAvgCost(self, dataPoints: DataBatch) -> float:
         totalCost = 0
-
         for dataPoint in dataPoints:
             totalCost += self.calculateCost(dataPoint=dataPoint)
-        
-        return totalCost/len(dataPoints)
+        return totalCost
+
+    def saveBrain(self, path:str) -> None:
+        with open(path, 'wb') as brainFile:
+            pickle.dump(self, file=brainFile)
+        return 
     
     def getMaxOutputNeuronIndex(self, inputs: np.ndarray) -> Dict[int, float]:
         outputs: np.ndarray = self.fullForward(inputs=inputs)
