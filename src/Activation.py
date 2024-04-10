@@ -13,22 +13,22 @@ class Activation(ABC):
     
     @staticmethod
     @abstractmethod
-    def activation(z: float, **kwargs) -> float | np.ndarray[float]:
+    def activation(z: float, **kwargs) -> float | np.ndarray:
         pass
     
     @staticmethod
     @abstractmethod
-    def derivative(z: float, **kwargs) -> float | np.ndarray[float]:
+    def derivative(z: float, **kwargs) -> float | np.ndarray:
         pass
 
 class Sigmoid(Activation):
     def __init__(self):
         super().__init__("Sigmoid")
 
-    def activation(z, *args) -> float | np.ndarray[float]:
+    def activation(z, *args) -> float | np.ndarray:
         return 1 / (1 + np.exp(-z))
     
-    def derivative(z, *args) -> float | np.ndarray[float]:
+    def derivative(z, *args) -> float | np.ndarray:
         t = Sigmoid.activation(z)
         return t * (1 - t)
 

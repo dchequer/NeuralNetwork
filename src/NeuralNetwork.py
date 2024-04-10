@@ -96,7 +96,7 @@ class NeuralNetwork:
         for dataPoint in learningBatch:
             self.fullBackward(inputs=dataPoint.inputs, expectedOutputs=dataPoint.expected) #update gradients
             for layer in self.layers: #actually apply all the calculated gradients
-                layer.backward(learnRate=learnRate, regularization=regularization, momentum=momentum)
+                layer.backward(learnRate=learnRate/len(learningBatch.dataPoints), regularization=regularization, momentum=momentum)
         
         return self.calculateAvgCost(dataPoints=learningBatch) #avg cost of batch after learning
 
@@ -114,10 +114,10 @@ class NeuralNetwork:
             for epoch in range(epochs):
                 curAvg = self.learn(learningBatch=trainingData.miniBatch(size=batchSize), learnRate=learnRate, regularization=regularization, momentum=momentum)
                 runningAvg += curAvg
-                if epoch % 250 == 0:
+                if epoch % (epochs*.5) == 0: # every 10% of epochs
                     print(f'Epoch {epoch} Real-Time-Cost: {self.calculateAvgCost(dataPoints=trainingData)} Avg Cost: {runningAvg/(epoch+1)}')
         
-        print(f'final avg: {self.calculateAvgCost(dataPoints=trainingData)}')
+        #print(f'final avg: {self.calculateAvgCost(dataPoints=trainingData)}')
         self.saveBrain(f'brain({curAvg})')
 
     def test(self, testingData: DataBatch, testSize: int) -> Dict[int, List[float]]:
@@ -127,6 +127,7 @@ class NeuralNetwork:
         for i, dataPoint in enumerate(testingData):
             testInput, testAnswer = dataPoint.inputs, dataPoint.expected
             prediction = self.getMaxOutputNeuronIndex(testInput)
+            print(f'testInput: {testInput} testAnswer: {testAnswer} prediction: {prediction[0]}')
             predictions[i] = [testAnswer, prediction[0]]
 
         return predictions
