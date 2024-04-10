@@ -13,24 +13,40 @@ class Activation(ABC):
     
     @staticmethod
     @abstractmethod
+<<<<<<< HEAD
     def activation(z: float, **kwargs) -> float | np.ndarray:
+=======
+    def activation(z: float, **kwargs) -> float:
+>>>>>>> origin/master
         pass
     
     @staticmethod
     @abstractmethod
+<<<<<<< HEAD
     def derivative(z: float, **kwargs) -> float | np.ndarray:
+=======
+    def derivative(z: float, **kwargs) -> float:
+>>>>>>> origin/master
         pass
 
 class Sigmoid(Activation):
     def __init__(self):
         super().__init__("Sigmoid")
 
+<<<<<<< HEAD
     def activation(z, *args) -> float | np.ndarray:
         return 1 / (1 + np.exp(-z))
     
     def derivative(z, *args) -> float | np.ndarray:
         t = Sigmoid.activation(z)
         return t * (1 - t)
+=======
+    def activation(z, *args) -> float:
+        return 1 / (1 + np.exp(-z))
+    
+    def derivative(z, *args) -> float:
+        return Sigmoid.activation(z) * (1 - Sigmoid.activation(z))
+>>>>>>> origin/master
 
 class ReLU(Activation):
     def __init__(self):
