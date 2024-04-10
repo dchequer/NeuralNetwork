@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-=======
-from math import isnan
->>>>>>> origin/master
 from Layer import *
 from Data import *
 from typing import List, Dict
@@ -11,7 +7,6 @@ import pickle
 
 class NeuralNetwork:
     def __init__(self, layerSizes: List[int], activation:Activation, cost: Cost):
-<<<<<<< HEAD
         '''
         Creates a list of layers and initializes their sizes using layerSizes, inputLayer is ignored 
         '''
@@ -23,21 +18,10 @@ class NeuralNetwork:
 
         self.cost: Cost = cost
         self.activation: Activation = activation
-=======
-        self.layers: List[Layer] = []
-        for i, size in enumerate(layerSizes):
-            try: nextSize = layerSizes[i+1] 
-            except IndexError: nextSize = size
-
-            self.layers.append(Layer(activation=activation, inputSize=size, outputSize=nextSize))
-
-        self.cost: Cost = cost
->>>>>>> origin/master
 
     def fullForward(self, inputs: np.ndarray) -> np.ndarray:
         '''
         Repeteadly Propagate Forward
-<<<<<<< HEAD
 
         '''
         for layer in self.layers:
@@ -115,60 +99,6 @@ class NeuralNetwork:
                 layer.backward(learnRate=learnRate/len(learningBatch.dataPoints), regularization=regularization, momentum=momentum)
         
         return self.calculateAvgCost(dataPoints=learningBatch) #avg cost of batch after learning
-=======
-        '''
-        for i, layer in enumerate(self.layers):
-            inputs = layer.forward(inputs=inputs)
-        return inputs
-    
-    def fullBackward(self, dataPoint: DataPoint) -> None:
-        '''
-        Repeteadly Propagate Backward
-        '''
-        # collection of all attributes for each layer and each node in said layer (weightedInputs, activationValues) 
-        learnData: Dict[List[np.ndarray]] = {} # {layerIndex: [arr[weightedInputs], arr[activationValues]]}
-        weightedInputs = dataPoint.inputs
-        for layerIndex, layer in enumerate(self.layers):
-            weightedInputs, activationValues = layer.forwardAndStore(inputs=weightedInputs)
-            learnData[layerIndex] = [weightedInputs, activationValues]
-        
-        outputLayerIndex = len(self.layers) - 1
-        outputLayerLearnData: List[np.ndarray] = learnData[outputLayerIndex] #stored data from output layer after propagation
-
-        #calculate partial derivatives for output layer and update output layer gradients
-        partialOutputDerivatives = self.layers[outputLayerIndex].partialOutputDerivatives(layerData=outputLayerLearnData, expectedOutputs=dataPoint.expected, cost=self.cost) #nodeValues
-        #learnData[outputLayerIndex].append(partialOutputDerivatives)
-        self.layers[outputLayerIndex].updateGradients(inputs=dataPoint.inputs, nodeValues=partialOutputDerivatives)
-        
-        #calculate partial derivatives for hidden layers and update all hidden layer gradients
-        for i in range(len(learnData)-1):
-            hiddenLayerIndex = outputLayerIndex - i
-            hiddenLayer = self.layers[hiddenLayerIndex]
-            previousLayer = self.layers[hiddenLayerIndex - 1]
-
-            previousNodeValues = hiddenLayer.partialOutputDerivatives(layerData=learnData[hiddenLayerIndex], expectedOutputs=dataPoint.expected, cost=self.cost)
-            #learnData[hiddenLayerIndex-1].append(previousLayerNodeValues)
-
-            partialHiddenDerivatives = hiddenLayer.partialHiddenDerivatives(layerData=learnData[hiddenLayerIndex], previousLayer=previousLayer, previousNodeValues=previousNodeValues)
-
-            hiddenLayer.updateGradients(inputs=dataPoint.inputs, nodeValues=partialHiddenDerivatives)
-        
-        return
-
-    def learn(self, learningBatch: DataBatch, learnRate: float, regularization: float = 0, momentum: float = 0) -> float:
-        # Use back-propagation algorithm (fullBackward), calculate gradient of Cost function
-        # WRT to weights and biases
-        # dataBatch is equivalent to trainingData
-
-        for dataPoint in learningBatch:
-            self.fullBackward(dataPoint=dataPoint) #update gradients
-        
-
-        for layer in self.layers:
-            layer.applyGradients(learnRate=learnRate / len(learningBatch), regularization=regularization, momentum=momentum)
-        
-        return self.calculateAvgCost(dataPoints=learningBatch)
->>>>>>> origin/master
 
     def train(self, trainingData: DataBatch, batchSize: int, epochs: int, learnRate: float, regularization: float = 0, momentum: float = 0, cool: bool = False) -> None:
         if cool:
@@ -184,16 +114,10 @@ class NeuralNetwork:
             for epoch in range(epochs):
                 curAvg = self.learn(learningBatch=trainingData.miniBatch(size=batchSize), learnRate=learnRate, regularization=regularization, momentum=momentum)
                 runningAvg += curAvg
-<<<<<<< HEAD
                 if epoch % (epochs*.5) == 0: # every 10% of epochs
                     print(f'Epoch {epoch} Real-Time-Cost: {self.calculateAvgCost(dataPoints=trainingData)} Avg Cost: {runningAvg/(epoch+1)}')
         
         #print(f'final avg: {self.calculateAvgCost(dataPoints=trainingData)}')
-=======
-                if epoch % 250 == 0:
-                    print(f'Epoch {epoch} Real-Time-Cost: {self.calculateAvgCost(dataPoints=trainingData)} Avg Cost: {runningAvg/(epoch+1)}')
-        
->>>>>>> origin/master
         self.saveBrain(f'brain({curAvg})')
 
     def test(self, testingData: DataBatch, testSize: int) -> Dict[int, List[float]]:
@@ -203,10 +127,7 @@ class NeuralNetwork:
         for i, dataPoint in enumerate(testingData):
             testInput, testAnswer = dataPoint.inputs, dataPoint.expected
             prediction = self.getMaxOutputNeuronIndex(testInput)
-<<<<<<< HEAD
             print(f'testInput: {testInput} testAnswer: {testAnswer} prediction: {prediction[0]}')
-=======
->>>>>>> origin/master
             predictions[i] = [testAnswer, prediction[0]]
 
         return predictions
@@ -214,10 +135,6 @@ class NeuralNetwork:
     def calculateCost(self, dataPoint: DataPoint) -> float:
         expectedOutputs: np.ndarray = dataPoint.expected #outputs from given DataPoint (true values)
         predictedOutputs: np.ndarray = self.fullForward(inputs=dataPoint.inputs) #real outputs from NN
-<<<<<<< HEAD
-=======
-        
->>>>>>> origin/master
         return self.cost.cost(predictedOutputs=predictedOutputs, expectedOutputs=expectedOutputs)
     
     def calculateAvgCost(self, dataPoints: DataBatch) -> float:
@@ -238,19 +155,12 @@ class NeuralNetwork:
 
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     '''
-=======
->>>>>>> origin/master
     NN = NeuralNetwork(layerSizes=[1, 3, 2], activation=Sigmoid, cost=MeanSquaredError)
     
     dataPoints = [DataPoint(inputs=np.array([0]), expected=np.array([1, 0]))]
 
     totalCost = NN.calculateAvgCost(dataPoints=dataPoints)
     
-<<<<<<< HEAD
     NN.fullBackward(dataPoint=dataPoints[0])
     '''
-=======
-    NN.fullBackward(dataPoint=dataPoints[0])
->>>>>>> origin/master
